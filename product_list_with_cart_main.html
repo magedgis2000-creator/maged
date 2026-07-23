@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Desserts Product List</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Red+Hat+Display:wght@400;600;700;800&display=swap" rel="stylesheet">
+</head>
+<style>
+    /* ==========================================================================
+   1. المتغيرات والتهيئة الأساسية (Variables & Reset)
+   ========================================================================== */
+:root {
+  --color-red: #c73b0f;
+  --color-rose-900: #260f08;
+  --color-rose-500: #87635a;
+  --color-rose-400: #ad8985;
+  --color-rose-100: #f5f0ec;
+  --color-rose-50: #fcf8f6;
+  --color-green: #1ea575;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Red Hat Display', sans-serif;
+  background-color: var(--color-rose-50);
+  color: var(--color-rose-900);
+  min-height: 100vh;
+  padding: 24px;
+}
+
+/* ==========================================================================
+   2. الحاوية الرئيسية والـ Grid المتجاوب (Layout)
+   ========================================================================== */
+.container {
+  max-width: 1216px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 32px;
+  padding-top: 16px;
+}
+
+/* التحول إلى عمودين في الشاشات الكبيرة (المنتجات + السلة) */
+@media (min-width: 1024px) {
+  .container {
+    grid-template-columns: 2.4fr 1.1fr;
+    align-items: start;
+  }
+}
+
+.main-title {
+  font-size: 40px;
+  font-weight: 800;
+  margin-bottom: 32px;
+}
+
+/* شبكة عرض المنتجات */
+.products-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+}
+
+@media (min-width: 600px) {
+  .products-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 900px) {
+  .products-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* ==========================================================================
+   3. بطاقة المنتج وعناصر التحكم (Product Card & Buttons)
+   ========================================================================== */
+.product-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.image-container {
+  position: relative;
+  width: 100%;
+  margin-bottom: 28px;
+}
+
+.product-image {
+  width: 100%;
+  border-radius: 8px;
+  display: block;
+  object-fit: cover;
+  transition: border 0.2s ease;
+  border: 2px solid transparent;
+}
+
+/* إضافة حافة حمراء عند اختيار المنتج وتنشيطه */
+.product-card.selected .product-image {
+  border-color: var(--color-red);
+}
+
+/* حاوية الأزرار المتموضعة في المنتصف السفلي للصورة */
+.btn-container {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translate(-50%, 50%);
+  width: 160px;
+  height: 44px;
+  z-index: 10;
+}
+
+/* زر إضافة إلى السلة الافتراضي */
+.btn-add-to-cart {
+  width: 100%;
+  height: 100%;
+  background-color: #fff;
+  border: 1px solid var(--color-rose-500);
+  border-radius: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-rose-900);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-add-to-cart:hover {
+  border-color: var(--color-red);
+  color: var(--color-red);
+}
+
+/* زر التحكم بالكمية النشط (الزيادة والنقصان) */
+.btn-quantity-control {
+  width: 100%;
+  height: 100%;
+  background-color: var(--color-red);
+  border-radius: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.qty-btn {
+  background: transparent;
+  border: 1px solid #fff;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.qty-btn:hover {
+  background-color: #fff;
+  color: var(--color-red);
+}
+
+.qty-btn svg path {
+  fill: currentColor;
+}
+
+/* تفاصيل المنتج */
+.product-info {
+  margin-top: 8px;
+}
+
+.product-category {
+  font-size: 14px;
+  color: var(--color-rose-500);
+  margin-bottom: 4px;
+}
+
+.product-name {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-rose-900);
+  margin-bottom: 4px;
+}
+
+.product-price {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-red);
+}
+
+/* ==========================================================================
+   4. قسم السلة الجانبي (Cart Section)
+   ========================================================================== */
+.cart-section {
+  background-color: #fff;
+  border-radius: 12px;
+  padding: 24px;
+}
+
+.cart-title {
+  color: var(--color-red);
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 24px;
+}
+
+/* السلة في الحالة الفارغة */
+.cart-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 16px 0;
+}
+
+.cart-empty-state img {
+  margin-bottom: 16px;
+}
+
+.cart-empty-state p {
+  color: var(--color-rose-500);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+/* عناصر السلة المضافة */
+.cart-items-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.cart-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--color-rose-100);
+}
+
+.cart-item-details h4 {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-rose-900);
+  margin-bottom: 8px;
+}
+
+.cart-item-meta {
+  display: flex;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.cart-item-qty {
+  color: var(--color-red);
+  font-weight: 600;
+  margin-right: 4px;
+}
+
+.cart-item-price {
+  color: var(--color-rose-400);
+}
+
+.cart-item-total {
+  color: var(--color-rose-500);
+  font-weight: 600;
+}
+
+/* زر الحذف (X) داخل السلة */
+.btn-remove-item {
+  background: transparent;
+  border: 1px solid var(--color-rose-400);
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--color-rose-400);
+  transition: all 0.2s ease;
+}
+
+.btn-remove-item:hover {
+  border-color: var(--color-rose-900);
+  color: var(--color-rose-900);
+}
+
+.btn-remove-item svg path {
+  fill: currentColor;
+}
+
+/* إجمالي الحساب وصندوق الشحن المحايد للكربون */
+.cart-total-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 0;
+}
+
+.cart-total-label {
+  font-size: 14px;
+  color: var(--color-rose-900);
+}
+
+.cart-total-amount {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--color-rose-900);
+}
+
+.carbon-neutral-box {
+  background-color: var(--color-rose-50);
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 14px;
+  margin-bottom: 24px;
+}
+
+.carbon-neutral-box span strong {
+  font-weight: 600;
+}
+
+/* أزرار التشغيل والتأكيد الأساسية */
+.btn-confirm-order, .btn-start-new {
+  width: 100%;
+  background-color: var(--color-red);
+  color: #fff;
+  border: none;
+  border-radius: 24px;
+  padding: 16px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.btn-confirm-order:hover, .btn-start-new:hover {
+  background-color: #a32e0a;
+}
+
+/* ==========================================================================
+   5. نافذة تأكيد الطلب المودال (Order Confirmation Modal)
+   ========================================================================== */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: none;
+  align-items: flex-end; /* يفتح كـ Sheet سفلي على الهواتف المحمولة */
+  justify-content: center;
+  z-index: 100;
+}
+
+/* يظهر عند إضافة كلاس active عبر الجافا سكريبت */
+.modal-overlay.active {
+  display: flex;
+}
+
+.modal-content {
+  background-color: #fff;
+  width: 100%;
+  max-width: 592px;
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+  padding: 40px 24px;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+/* يرتكز في المنتصف تماماً على شاشات التابلت والديسكتوب */
+@media (min-width: 600px) {
+  .modal-overlay {
+    align-items: center;
+  }
+  .modal-content {
+    border-radius: 12px;
+    padding: 40px;
+  }
+}
+
+.modal-icon {
+  margin-bottom: 24px;
+  width: 48px;
+  height: 48px;
+}
+
+.modal-content h2 {
+  font-size: 40px;
+  font-weight: 700;
+  line-height: 120%;
+  margin-bottom: 8px;
+}
+
+.modal-subtitle {
+  color: var(--color-rose-500);
+  font-size: 16px;
+  margin-bottom: 32px;
+}
+
+/* صندوق ملخص الفاتورة النهائي */
+.modal-summary-box {
+  background-color: var(--color-rose-50);
+  border-radius: 8px;
+  padding: 24px;
+  margin-bottom: 32px;
+}
+
+.modal-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 16px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--color-rose-100);
+}
+
+.modal-item-left {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.modal-item-thumb {
+  width: 48px;
+  height: 48px;
+  border-radius: 4px;
+  object-fit: cover;
+}
+
+.modal-item-info h4 {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 150px;
+}
+
+@media (min-width: 400px) {
+  .modal-item-info h4 {
+    max-width: 250px;
+  }
+}
+
+.modal-item-meta {
+  display: flex;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.modal-item-qty {
+  color: var(--color-red);
+  font-weight: 600;
+}
+
+.modal-item-price {
+  color: var(--color-rose-400);
+}
+
+.modal-item-right {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-rose-900);
+}
+
+.modal-total-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-top: 8px;
+}
+
+.modal-total-row span:first-child {
+  font-size: 14px;
+  color: var(--color-rose-900);
+}
+
+.modal-total-price {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--color-rose-900);
+}
+</style>
+<body>
+
+  <main class="container">
+    <section class="products-section">
+      <h1 class="main-title">Desserts</h1>
+      <div class="products-grid" id="products-container">
+        </div>
+    </section>
+
+    <aside class="cart-section" id="cart-container">
+      </aside>
+  </main>
+
+  <div class="modal-overlay" id="order-modal">
+    <div class="modal-content">
+      <svg class="modal-icon" xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="none" viewBox="0 0 48 48">
+        <path fill="#1EA575" d="M24 0C10.74 0 0 10.74 0 24s10.74 24 24 24 24-10.74 24-24S37.26 0 24 0Zm11.33 18.84-14.4 14.4a1 1 0 0 1-1.42 0l-6.4-6.4a1 1 0 0 1 1.42-1.42l5.69 5.69 13.69-13.69a1 1 0 0 1 1.42 1.42Z"/>
+      </svg>
+      <h2>Order Confirmed</h2>
+      <p class="modal-subtitle">We hope you enjoy your food!</p>
+      
+      <div class="modal-summary-box">
+        <div id="modal-items-list"></div>
+        <div class="modal-total-row">
+          <span>Order Total</span>
+          <span class="modal-total-price" id="modal-order-total">$0.00</span>
+        </div>
+      </div>
+      <button class="btn-start-new" id="btn-start-new">Start New Order</button>
+    </div>
+  </div>
+
+  <script>
+    // البيانات مدمجة مباشرة لمنع مشاكل الـ Fetch والأمان في المتصفحات
+const productsData = [
+  {
+    "image": {
+      "thumbnail": "./assets/images/image-waffle-thumbnail.jpg",
+      "mobile": "./assets/images/image-waffle-mobile.jpg",
+      "tablet": "./assets/images/image-waffle-tablet.jpg",
+      "desktop": "./assets/images/image-waffle-desktop.jpg"
+    },
+    "name": "Waffle with Berries",
+    "category": "Waffle",
+    "price": 6.50
+  },
+  {
+    "image": {
+      "thumbnail": "./assets/images/image-creme-brulee-thumbnail.jpg",
+      "mobile": "./assets/images/image-creme-brulee-mobile.jpg",
+      "tablet": "./assets/images/image-creme-brulee-tablet.jpg",
+      "desktop": "./assets/images/image-creme-brulee-desktop.jpg"
+    },
+    "name": "Vanilla Bean Crème Brûlée",
+    "category": "Crème Brûlée",
+    "price": 7.00
+  },
+  {
+    "image": {
+      "thumbnail": "./assets/images/image-macaron-thumbnail.jpg",
+      "mobile": "./assets/images/image-macaron-mobile.jpg",
+      "tablet": "./assets/images/image-macaron-tablet.jpg",
+      "desktop": "./assets/images/image-macaron-desktop.jpg"
+    },
+    "name": "Macaron Mix of Five",
+    "category": "Macaron",
+    "price": 8.00
+  },
+  {
+    "image": {
+      "thumbnail": "./assets/images/image-tiramisu-thumbnail.jpg",
+      "mobile": "./assets/images/image-tiramisu-mobile.jpg",
+      "tablet": "./assets/images/image-tiramisu-tablet.jpg",
+      "desktop": "./assets/images/image-tiramisu-desktop.jpg"
+    },
+    "name": "Classic Tiramisu",
+    "category": "Tiramisu",
+    "price": 5.50
+  },
+  {
+    "image": {
+      "thumbnail": "./assets/images/image-baklava-thumbnail.jpg",
+      "mobile": "./assets/images/image-baklava-mobile.jpg",
+      "tablet": "./assets/images/image-baklava-tablet.jpg",
+      "desktop": "./assets/images/image-baklava-desktop.jpg"
+    },
+    "name": "Pistachio Baklava",
+    "category": "Baklava",
+    "price": 4.00
+  },
+  {
+    "image": {
+      "thumbnail": "./assets/images/image-pie-thumbnail.jpg",
+      "mobile": "./assets/images/image-pie-mobile.jpg",
+      "tablet": "./assets/images/image-pie-tablet.jpg",
+      "desktop": "./assets/images/image-pie-desktop.jpg"
+    },
+    "name": "Lemon Meringue Pie",
+    "category": "Pie",
+    "price": 5.00
+  },
+  {
+    "image": {
+      "thumbnail": "./assets/images/image-cake-thumbnail.jpg",
+      "mobile": "./assets/images/image-cake-mobile.jpg",
+      "tablet": "./assets/images/image-cake-tablet.jpg",
+      "desktop": "./assets/images/image-cake-desktop.jpg"
+    },
+    "name": "Red Velvet Cake",
+    "category": "Cake",
+    "price": 4.50
+  },
+  {
+    "image": {
+      "thumbnail": "./assets/images/image-brownie-thumbnail.jpg",
+      "mobile": "./assets/images/image-brownie-mobile.jpg",
+      "tablet": "./assets/images/image-brownie-tablet.jpg",
+      "desktop": "./assets/images/image-brownie-desktop.jpg"
+    },
+    "name": "Salted Caramel Brownie",
+    "category": "Brownie",
+    "price": 5.50
+  },
+  {
+    "image": {
+      "thumbnail": "./assets/images/image-panna-cotta-thumbnail.jpg",
+      "mobile": "./assets/images/image-panna-cotta-mobile.jpg",
+      "tablet": "./assets/images/image-panna-cotta-tablet.jpg",
+      "desktop": "./assets/images/image-panna-cotta-desktop.jpg"
+    },
+    "name": "Vanilla Panna Cotta",
+    "category": "Panna Cotta",
+    "price": 6.50
+  }
+];
+
+let cart = [];
+
+const productsContainer = document.getElementById('products-container');
+const cartContainer = document.getElementById('cart-container');
+const orderModal = document.getElementById('order-modal');
+const modalItemsList = document.getElementById('modal-items-list');
+const modalOrderTotal = document.getElementById('modal-order-total');
+const btnStartNew = document.getElementById('btn-start-new');
+
+// رندرة المنتجات
+function renderProducts() {
+  productsContainer.innerHTML = '';
+
+  productsData.forEach((product, index) => {
+    const cartItem = cart.find(item => item.productIndex === index);
+    const quantity = cartItem ? cartItem.quantity : 0;
+    const isSelected = quantity > 0;
+
+    const card = document.createElement('div');
+    card.className = `product-card ${isSelected ? 'selected' : ''}`;
+
+    card.innerHTML = `
+      <div class="image-container">
+        <picture>
+          <source media="(min-width: 1024px)" srcset="${product.image.desktop}">
+          <source media="(min-width: 600px)" srcset="${product.image.tablet}">
+          <img src="${product.image.mobile}" alt="${product.name}" class="product-image">
+        </picture>
+        
+        <div class="btn-container">
+          ${!isSelected ? `
+            <button class="btn-add-to-cart" onclick="addToCart(${index})">
+              <img src="./assets/images/icon-add-to-cart.svg" alt="">
+              Add to Cart
+            </button>
+          ` : `
+            <div class="btn-quantity-control">
+              <button class="qty-btn" onclick="updateQuantity(${index}, -1)">
+                <svg xmlns="http://www.w3.org/2000/svg" width="10" height="2" fill="none" viewBox="0 0 10 2">
+                  <path fill="#fff" d="M0 .375h10v1.25H0V.375Z"/>
+                </svg>
+              </button>
+              <span class="qty-val">${quantity}</span>
+              <button class="qty-btn" onclick="updateQuantity(${index}, 1)">
+                <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" fill="none" viewBox="0 0 10 10">
+                  <path fill="#fff" d="M10 4.375H5.625V0h-1.25v4.375H0v1.25h4.375V10h1.25V5.625H10v-1.25Z"/>
+                </svg>
+              </button>
+            </div>
+          `}
+        </div>
+      </div>
+      <div class="product-info">
+        <p class="product-category">${product.category}</p>
+        <h3 class="product-name">${product.name}</h3>
+        <p class="product-price">$${product.price.toFixed(2)}</p>
+      </div>
+    `;
+    productsContainer.appendChild(card);
+  });
+}
+
+// رندرة السلة
+function renderCart() {
+  const totalItemsCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+  const totalOrderPrice = cart.reduce((sum, item) => sum + (item.quantity * item.price), 0);
+
+  if (cart.length === 0) {
+    cartContainer.innerHTML = `
+      <h2 class="cart-title">Your Cart (0)</h2>
+      <div class="cart-empty-state">
+        <img src="./assets/images/illustration-empty-cart.svg" alt="Empty Cart">
+        <p>Your added items will appear here</p>
+      </div>
+    `;
+    return;
+  }
+
+  let cartHTML = `<h2 class="cart-title">Your Cart (${totalItemsCount})</h2>`;
+  cartHTML += `<div class="cart-items-list">`;
+
+  cart.forEach(item => {
+    const itemTotal = item.quantity * item.price;
+    cartHTML += `
+      <div class="cart-item">
+        <div class="cart-item-details">
+          <h4>${item.name}</h4>
+          <div class="cart-item-meta">
+            <span class="cart-item-qty">${item.quantity}x</span>
+            <span class="cart-item-price">@ $${item.price.toFixed(2)}</span>
+            <span class="cart-item-total">$${itemTotal.toFixed(2)}</span>
+          </div>
+        </div>
+        <button class="btn-remove-item" onclick="removeFromCart(${item.productIndex})">
+          <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" fill="none" viewBox="0 0 10 10">
+            <path fill="#CAAFA7" d="M8.375 9.375 5 6 1.625 9.375l-1-1L4 5 .625 1.625l1-1L5 4 8.375.625l1 1L6 5l3.375 3.375-1 1Z"/>
+          </svg>
+        </button>
+      </div>
+    `;
+  });
+
+  cartHTML += `</div>`;
+  cartHTML += `
+    <div class="cart-total-container">
+      <span class="cart-total-label">Order Total</span>
+      <span class="cart-total-amount">$${totalOrderPrice.toFixed(2)}</span>
+    </div>
+    <div class="carbon-neutral-box">
+      <img src="./assets/images/icon-carbon-neutral.svg" alt="">
+      <span>This is a <strong>carbon-neutral</strong> delivery</span>
+    </div>
+    <button class="btn-confirm-order" id="btn-confirm-order">Confirm Order</button>
+  `;
+
+  cartContainer.innerHTML = cartHTML;
+  document.getElementById('btn-confirm-order').addEventListener('click', showOrderModal);
+}
+
+window.addToCart = function(index) {
+  const product = productsData[index];
+  cart.push({
+    productIndex: index,
+    name: product.name,
+    price: product.price,
+    thumbnail: product.image.thumbnail,
+    quantity: 1
+  });
+  renderProducts();
+  renderCart();
+};
+
+window.updateQuantity = function(index, change) {
+  const cartItemIndex = cart.findIndex(item => item.productIndex === index);
+  if (cartItemIndex > -1) {
+    cart[cartItemIndex].quantity += change;
+    if (cart[cartItemIndex].quantity <= 0) {
+      cart.splice(cartItemIndex, 1);
+    }
+    renderProducts();
+    renderCart();
+  }
+};
+
+window.removeFromCart = function(index) {
+  cart = cart.filter(item => item.productIndex !== index);
+  renderProducts();
+  renderCart();
+};
+
+function showOrderModal() {
+  modalItemsList.innerHTML = '';
+  let totalOrderPrice = 0;
+
+  cart.forEach(item => {
+    const itemTotal = item.quantity * item.price;
+    totalOrderPrice += itemTotal;
+
+    const modalItemRow = document.createElement('div');
+    modalItemRow.className = 'modal-item';
+    modalItemRow.innerHTML = `
+      <div class="modal-item-left">
+        <img src="${item.thumbnail}" alt="" class="modal-item-thumb">
+        <div class="modal-item-info">
+          <h4>${item.name}</h4>
+          <div class="modal-item-meta">
+            <span class="modal-item-qty">${item.quantity}x</span>
+            <span class="modal-item-price">@ $${item.price.toFixed(2)}</span>
+          </div>
+        </div>
+      </div>
+      <div class="modal-item-right">$${itemTotal.toFixed(2)}</div>
+    `;
+    modalItemsList.appendChild(modalItemRow);
+  });
+
+  modalOrderTotal.textContent = `$${totalOrderPrice.toFixed(2)}`;
+  orderModal.classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+btnStartNew.addEventListener('click', () => {
+  cart = [];
+  orderModal.classList.remove('active');
+  document.body.style.overflow = 'auto';
+  renderProducts();
+  renderCart();
+});
+
+// التشغيل الفوري
+renderProducts();
+renderCart();
+  </script>
+</body>
+</html>
